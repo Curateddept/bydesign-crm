@@ -1,13 +1,5 @@
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
-import { neonConfig, Pool } from '@neondatabase/serverless'
-import ws from 'ws'
-
-neonConfig.webSocketConstructor = ws
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaNeon(pool)
-const prisma = new PrismaClient({ adapter } as any)
+import { Client } from 'pg'
 
 const CLIENTS = [
   { id:'cmobsz3f000002evunlyf10j2', name:'BenchMark',         monthlyRate:1500,  paymentDueDay:1, portalEnabled:true,  portalPin:'3333' },
@@ -34,21 +26,27 @@ const CLIENTS = [
 ]
 
 async function main() {
-  console.log('🌱 Seeding database with your real data...')
+  const client = new Client({ connectionString: process.env.DATABASE_URL })
+  await client.connect()
+  console.log('🌱 Seeding database...')
+
   for (const c of CLIENTS) {
-    await prisma.client.upsert({
-      where: { id: c.id },
-      update: {},
-      create: {
-        id: c.id, name: c.name, status: 'active',
-        monthlyRate: c.monthlyRate, paymentDueDay: c.paymentDueDay,
-        portalEnabled: c.portalEnabled, portalPin: c.portalPin,
-      }
-    })
+    await client.query(`
+      INSERT INTO "Client" (id, name, status, "monthlyRate", "paymentDueDay", "portalEnabled", "portalPin", "createdAt", "updatedAt")
+      VALUES ($1, $2, 'active', $3, $4, $5, $6, NOW(), NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        "monthlyRate" = EXCLUDED."monthlyRate",
+        "paymentDueDay" = EXCLUDED."paymentDueDay",
+        "portalEnabled" = EXCLUDED."portalEnabled",
+        "portalPin" = EXCLUDED."portalPin",
+        "updatedAt" = NOW()
+    `, [c.id, c.name, c.monthlyRate, c.paymentDueDay, c.portalEnabled, c.portalPin])
+    console.log(`  ✓ ${c.name}`)
   }
+
   console.log(`✅ ${CLIENTS.length} clients seeded`)
+  await client.end()
 }
 
-main()
-  .catch(e => { console.error(e); process.exit(1) })
-  .finally(() => prisma.$disconnect())
+main().catch(e => { console.error(e); process.exit(1) })
