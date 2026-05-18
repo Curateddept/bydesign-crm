@@ -1,0 +1,124 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model Client {
+  id             String   @id @default(cuid())
+  name           String
+  email          String?
+  phone          String?
+  company        String?
+  status         String   @default("active")
+  instagram      String?
+  tiktok         String?
+  facebook       String?
+  twitter        String?
+  youtube        String?
+  notes          String?
+  monthlyRate    Float?
+  paymentDueDay  Int?
+  portalPin      String?
+  portalEnabled  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  contracts    Contract[]
+  deliverables Deliverable[]
+  analytics    AnalyticsEntry[]
+  contentItems ContentItem[]
+  clientNotes  ClientNote[]
+}
+
+model Contract {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title        String
+  value        Float?
+  startDate    String?
+  endDate      String?
+  status       String   @default("active")
+  paymentTerms String?
+  scope        String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Deliverable {
+  id          String   @id @default(cuid())
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title       String
+  type        String?
+  platform    String?
+  dueDate     String?
+  weekOf      String?
+  status      String   @default("pending")
+  priority    String   @default("normal")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ClientNote {
+  id         String   @id @default(cuid())
+  clientId   String
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  content    String
+  type       String   @default("note")
+  status     String   @default("open")
+  priority   String   @default("normal")
+  reminderAt String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AnalyticsEntry {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  platform        String
+  periodStart     String
+  periodEnd       String
+  followers       Int?
+  followersGrowth Int?
+  reach           Int?
+  impressions     Int?
+  engagementRate  Float?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  saves           Int?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ContentItem {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title       String
+  caption     String?
+  platform    String?
+  type        String?
+  dayOfWeek   String?
+  postTime    String?
+  scheduledAt String?
+  status      String   @default("idea")
+  notes       String?
+  hashtags    String?
+  strategy    String?
+  fileUrl     String?
+  fileName    String?
+  fileType    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
