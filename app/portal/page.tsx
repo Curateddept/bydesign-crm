@@ -29,7 +29,7 @@ export default function PortalLogin() {
   }
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0b0f1a', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+    <div style={{ minHeight:'100vh', width:'100%', background:'#0b0f1a', display:'flex', alignItems:'center', justifyContent:'center', padding:20, boxSizing:'border-box' }}>
       <div style={{ width:'100%', maxWidth:400 }}>
         {/* Logo */}
         <div style={{ textAlign:'center', marginBottom:40 }}>

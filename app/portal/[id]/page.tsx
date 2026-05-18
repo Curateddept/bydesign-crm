@@ -490,7 +490,7 @@ export default function ClientPortalPage() {
   const newIdeasBadge = false // could track unread
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0b0f1a', color:'#f0f4ff' }}>
+    <div style={{ minHeight:'100vh', width:'100%', background:'#0b0f1a', color:'#f0f4ff', boxSizing:'border-box' }}>
 
       {/* Top bar */}
       <div style={{ borderBottom:'1px solid #1e2a40', padding:'16px 32px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -513,7 +513,7 @@ export default function ClientPortalPage() {
         </button>
       </div>
 
-      <div style={{ maxWidth:1060, margin:'0 auto', padding:'32px 28px' }}>
+      <div style={{ width:'100%', padding:'32px 40px', boxSizing:'border-box' }}>
 
         {/* Welcome */}
         <div style={{ marginBottom:28 }}>
