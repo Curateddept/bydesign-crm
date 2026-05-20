@@ -12,8 +12,25 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(entries)
 }
 
+function coerceAnalytics(raw: any) {
+  const toInt  = (v: any) => v === '' || v === null || v === undefined ? null : parseInt(v)
+  const toFloat = (v: any) => v === '' || v === null || v === undefined ? null : parseFloat(v)
+  return {
+    ...raw,
+    followers:       toInt(raw.followers),
+    followersGrowth: toInt(raw.followersGrowth),
+    reach:           toInt(raw.reach),
+    impressions:     toInt(raw.impressions),
+    likes:           toInt(raw.likes),
+    comments:        toInt(raw.comments),
+    shares:          toInt(raw.shares),
+    saves:           toInt(raw.saves),
+    engagementRate:  toFloat(raw.engagementRate),
+  }
+}
+
 export async function POST(req: NextRequest) {
-  const data = await req.json()
-  const entry = await prisma.analyticsEntry.create({ data })
+  const raw = await req.json()
+  const entry = await prisma.analyticsEntry.create({ data: coerceAnalytics(raw) })
   return NextResponse.json(entry, { status: 201 })
 }

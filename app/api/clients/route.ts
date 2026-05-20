@@ -12,7 +12,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const data = await req.json()
+  const raw = await req.json()
+  const data = {
+    ...raw,
+    monthlyRate:   raw.monthlyRate   !== undefined ? (raw.monthlyRate   === '' || raw.monthlyRate   === null ? null : parseFloat(raw.monthlyRate))   : undefined,
+    paymentDueDay: raw.paymentDueDay !== undefined ? (raw.paymentDueDay === '' || raw.paymentDueDay === null ? null : parseInt(raw.paymentDueDay))   : undefined,
+    portalEnabled: raw.portalEnabled !== undefined ? Boolean(raw.portalEnabled) : undefined,
+  }
   const client = await prisma.client.create({ data })
   return NextResponse.json(client, { status: 201 })
 }

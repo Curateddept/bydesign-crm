@@ -3,7 +3,11 @@ import { prisma } from '@/lib/prisma'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const data = await req.json()
+  const raw = await req.json()
+  const data = {
+    ...raw,
+    value: raw.value !== undefined ? (raw.value === '' || raw.value === null ? null : parseFloat(raw.value)) : undefined,
+  }
   const contract = await prisma.contract.update({ where: { id }, data })
   return NextResponse.json(contract)
 }
