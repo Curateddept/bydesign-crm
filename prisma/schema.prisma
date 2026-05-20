@@ -51,19 +51,31 @@ model Contract {
 }
 
 model Deliverable {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   clientId    String?
-  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   title       String
   type        String?
   platform    String?
   dueDate     String?
   weekOf      String?
-  status      String   @default("pending")
-  priority    String   @default("normal")
+  status      String    @default("pending")
+  priority    String    @default("normal")
   notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  subTasks    SubTask[]
+}
+
+model SubTask {
+  id             String      @id @default(cuid())
+  deliverableId  String
+  deliverable    Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  title          String
+  done           Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model ClientNote {

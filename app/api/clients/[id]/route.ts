@@ -7,7 +7,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     where: { id },
     include: {
       contracts: { orderBy: { createdAt: 'desc' } },
-      deliverables: { orderBy: { dueDate: 'asc' } },
+      deliverables: { orderBy: { dueDate: 'asc' }, include: { subTasks: { orderBy: { createdAt: 'asc' } } } },
       analytics: { orderBy: { periodStart: 'desc' } },
       contentItems: { orderBy: { scheduledAt: 'asc' } },
     },
