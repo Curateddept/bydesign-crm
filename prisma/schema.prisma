@@ -59,10 +59,12 @@ model Deliverable {
   type        String?
   platform    String?
   dueDate     String?
+  dueTime     String?
   weekOf      String?
   status      String    @default("pending")
   priority    String    @default("normal")
   notes       String?
+  gcalEventId String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

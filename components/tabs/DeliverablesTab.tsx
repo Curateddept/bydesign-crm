@@ -6,7 +6,7 @@ const TYPES = ['Post','Reel','Story','Carousel','Caption','Strategy Doc','Analyt
 const PLATFORMS = ['Instagram','TikTok','Facebook','Twitter/X','YouTube','LinkedIn','All Platforms']
 const PRIORITIES = ['low','normal','high']
 
-const blank = { title:'', type:'Post', platform:'Instagram', dueDate:'', weekOf:'', status:'pending', priority:'normal', notes:'' }
+const blank = { title:'', type:'Post', platform:'Instagram', dueDate:'', dueTime:'', weekOf:'', status:'pending', priority:'normal', notes:'' }
 
 const statusStyle:Record<string,{chip:string}> = {
   pending:    { chip:'chip-yellow' },
@@ -204,7 +204,7 @@ export default function DeliverablesTab({ client, onRefresh }:{ client:any; onRe
   }
 
   const startEdit = (d:any) => {
-    setForm({ title:d.title, type:d.type||'Post', platform:d.platform||'Instagram', dueDate:d.dueDate||'', weekOf:d.weekOf||'', status:d.status, priority:d.priority||'normal', notes:d.notes||'' })
+    setForm({ title:d.title, type:d.type||'Post', platform:d.platform||'Instagram', dueDate:d.dueDate||'', dueTime:d.dueTime||'', weekOf:d.weekOf||'', status:d.status, priority:d.priority||'normal', notes:d.notes||'' })
     setEditing(d.id); setAdding(false)
   }
 
@@ -247,14 +247,22 @@ export default function DeliverablesTab({ client, onRefresh }:{ client:any; onRe
                 </select>
               </F>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr 1fr', gap:10 }}>
               <F label="Status">
                 <select value={form.status} onChange={e=>set('status',e.target.value)} className="input">
                   {STATUS.map(s=><option key={s} value={s}>{s.replace('_',' ')}</option>)}
                 </select>
               </F>
               <F label="Due Date"><input value={form.dueDate} onChange={e=>set('dueDate',e.target.value)} type="date" className="input" /></F>
+              <F label="Due Time">
+                <input value={form.dueTime} onChange={e=>set('dueTime',e.target.value)} type="time" className="input" placeholder="--:--" />
+              </F>
               <F label="Week Of"><input value={form.weekOf} onChange={e=>set('weekOf',e.target.value)} type="date" className="input" /></F>
+              <F label="📅 Calendar">
+                <div style={{ fontSize:10, color: form.dueDate ? '#00e87a' : '#3d4f6e', padding:'9px 0', lineHeight:1.4 }}>
+                  {form.dueDate ? `Syncs to Google${form.dueTime ? ` at ${form.dueTime}` : ' (all day)'}` : 'Set date to sync'}
+                </div>
+              </F>
             </div>
             <F label="Notes"><textarea value={form.notes} onChange={e=>set('notes',e.target.value)} placeholder="Details..." rows={2} className="input" style={{ resize:'vertical' }} /></F>
             <div style={{ display:'flex', gap:8 }}>
@@ -303,7 +311,7 @@ export default function DeliverablesTab({ client, onRefresh }:{ client:any; onRe
                     <div style={{ fontSize:13, fontWeight:600, color:'#fff', marginBottom:2 }}>{d.title}</div>
                     <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                       <span style={{ fontSize:11, color:'#444' }}>
-                        {[d.type, d.platform, d.dueDate?`Due ${new Date(d.dueDate).toLocaleDateString()}`:null, d.weekOf?`Week of ${new Date(d.weekOf).toLocaleDateString()}`:null].filter(Boolean).join(' · ')}
+                        {[d.type, d.platform, d.dueDate?`Due ${new Date(d.dueDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}${d.dueTime?` @ ${d.dueTime}`:''}`:null, d.weekOf?`Week of ${new Date(d.weekOf+'T12:00:00').toLocaleDateString()}`:null].filter(Boolean).join(' · ')}
                       </span>
                       {subTasks.length > 0 && (
                         <span style={{
