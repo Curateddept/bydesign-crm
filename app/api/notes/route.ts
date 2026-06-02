@@ -4,8 +4,21 @@ import { prisma } from '@/lib/prisma'
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const clientId = searchParams.get('clientId')
+  const type     = searchParams.get('type')
+
+  // Special filter: all client-submitted inbox messages across all clients
+  const where: any = clientId ? { clientId } : {}
+  if (type === 'client_inbox') {
+    where.OR = [
+      { type: 'client_idea' },
+      { content: { startsWith: '[CLIENT FEEDBACK]' } },
+    ]
+  } else if (type) {
+    where.type = type
+  }
+
   const notes = await prisma.clientNote.findMany({
-    where: clientId ? { clientId } : undefined,
+    where,
     orderBy: { createdAt: 'desc' },
     include: { client: { select: { name: true } } },
   })

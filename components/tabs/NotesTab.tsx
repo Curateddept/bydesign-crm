@@ -10,7 +10,16 @@ export default function NotesTab({ client, onRefresh }:{ client:any; onRefresh:(
   const set = (k:string,v:string) => setForm(f=>({...f,[k]:v}))
 
   const notes:any[] = client.clientNotes || []
-  const items = notes.filter(n => filter==='all'||(filter==='todo'&&n.type==='todo'&&n.status==='open')||(filter==='note'&&n.type==='note')||(filter==='done'&&n.status==='done'))
+
+  // Client-submitted messages shown separately at the top
+  const isClientMsg = (n:any) => n.type==='client_idea' || n.content?.startsWith('[CLIENT FEEDBACK]')
+  const clientMessages = notes.filter(isClientMsg)
+  const unreadClientMsgs = clientMessages.filter((n:any) => n.status==='open')
+
+  const items = notes.filter(n => {
+    if (isClientMsg(n)) return false // always shown in the inbox section above
+    return filter==='all'||(filter==='todo'&&n.type==='todo'&&n.status==='open')||(filter==='note'&&n.type==='note')||(filter==='done'&&n.status==='done')
+  })
 
   const save = async () => {
     if (!form.content.trim()) return
@@ -46,6 +55,62 @@ export default function NotesTab({ client, onRefresh }:{ client:any; onRefresh:(
         </div>
         <button onClick={()=>setAdding(a=>!a)} className="btn btn-primary btn-sm">+ ADD</button>
       </div>
+
+      {/* ── Client Inbox ─────────────────────────────────────────────────── */}
+      {clientMessages.length > 0 && (
+        <div style={{ marginBottom:20 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <span style={{ fontSize:11, fontWeight:700, color:'#ff9900', letterSpacing:'0.08em', textTransform:'uppercase' }}>
+              📥 Client Inbox
+            </span>
+            {unreadClientMsgs.length > 0 && (
+              <span style={{ fontSize:10, fontWeight:800, color:'#fff', background:'#ff3366', borderRadius:10, padding:'1px 7px' }}>
+                {unreadClientMsgs.length} new
+              </span>
+            )}
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {clientMessages.map((n:any) => {
+              const isIdea = n.type === 'client_idea'
+              const cleanContent = n.content?.replace('[CLIENT FEEDBACK] ','') || ''
+              const isDone = n.status === 'done'
+              return (
+                <div key={n.id} style={{
+                  padding:'12px 16px',
+                  background: isDone ? 'rgba(255,255,255,0.02)' : 'rgba(255,153,0,0.06)',
+                  border: `1px solid ${isDone ? '#1a1a2e' : 'rgba(255,153,0,0.2)'}`,
+                  borderLeft: `3px solid ${isDone ? '#2a3a55' : isIdea ? '#a855f7' : '#ff9900'}`,
+                  borderRadius:4, opacity: isDone ? 0.5 : 1, transition:'opacity 0.2s',
+                }}>
+                  <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <span style={{ fontSize:13, flexShrink:0 }}>{isIdea ? '💡' : '💬'}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
+                        <span style={{ fontSize:10, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase',
+                          color: isIdea ? '#a855f7' : '#ff9900' }}>
+                          {isIdea ? 'Idea / Request' : 'Feedback'}
+                        </span>
+                        <span style={{ fontSize:10, color:'#3d4f6e' }}>
+                          {new Date(n.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+                        </span>
+                        {!isDone && <span style={{ fontSize:9, fontWeight:700, color:'#ff9900', background:'rgba(255,153,0,0.1)', border:'1px solid rgba(255,153,0,0.2)', borderRadius:3, padding:'1px 5px' }}>UNREAD</span>}
+                      </div>
+                      <p style={{ fontSize:13, color: isDone ? '#444' : '#d0d8f0', lineHeight:1.7, textDecoration: isDone?'line-through':'none' }}>
+                        {cleanContent}
+                      </p>
+                    </div>
+                    <button onClick={()=>toggle(n)} title={isDone?'Mark unread':'Mark read'}
+                      style={{ background:'none', border:`1px solid ${isDone?'#1e2a40':'#2a3a55'}`, borderRadius:3, cursor:'pointer',
+                        color: isDone?'#3d4f6e':'#00ff88', fontSize:11, padding:'4px 10px', flexShrink:0, transition:'all 0.15s' }}>
+                      {isDone ? 'Unread' : '✓ Read'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Reminder alerts */}
       {reminders.map(r=>(

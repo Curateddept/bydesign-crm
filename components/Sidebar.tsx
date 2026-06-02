@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 const NAV = [
   { label: 'Command Center', href: '/', icon: '◈' },
@@ -14,6 +15,28 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [inboxCount, setInboxCount] = useState(0)
+
+  // Poll for unread client messages every 30s
+  useEffect(() => {
+    const load = () => {
+      fetch('/api/notes?type=client_inbox')
+        .then(r => r.ok ? r.json() : [])
+        .then(data => {
+          const unread = Array.isArray(data)
+            ? data.filter((n: any) =>
+                (n.type === 'client_idea' || n.content?.startsWith('[CLIENT FEEDBACK]')) &&
+                n.status === 'open'
+              ).length
+            : 0
+          setInboxCount(unread)
+        })
+        .catch(() => {})
+    }
+    load()
+    const interval = setInterval(load, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <aside style={{
@@ -50,6 +73,7 @@ export default function Sidebar() {
       <nav style={{ flex: 1, padding: '10px 0' }}>
         {NAV.map((item, i) => {
           const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+          const isClients = item.href === '/clients'
           return (
             <Link key={item.href} href={item.href} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -64,11 +88,33 @@ export default function Sidebar() {
               animationDelay: `${i * 0.05}s`,
             }}>
               <span style={{ fontSize: 14, opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-              {item.label}
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {/* Inbox badge on Clients nav item */}
+              {isClients && inboxCount > 0 && (
+                <span style={{
+                  fontSize: 9, fontWeight: 800, color: '#fff',
+                  background: '#ff3366', borderRadius: 10,
+                  padding: '1px 6px', lineHeight: 1.6, flexShrink: 0,
+                }}>
+                  {inboxCount}
+                </span>
+              )}
             </Link>
           )
         })}
       </nav>
+
+      {/* Client inbox quick summary */}
+      {inboxCount > 0 && (
+        <div style={{ margin: '0 12px 12px', padding: '10px 12px', background: 'rgba(255,51,102,0.06)', border: '1px solid rgba(255,51,102,0.15)', borderRadius: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#ff6688', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>
+            📥 Client Inbox
+          </div>
+          <div style={{ fontSize: 11, color: '#888' }}>
+            {inboxCount} unread message{inboxCount !== 1 ? 's' : ''} — check client Notes tabs
+          </div>
+        </div>
+      )}
 
       {/* Add Client CTA */}
       <div style={{ padding: '16px 16px 20px', borderTop: '1px solid #1a2335' }}>

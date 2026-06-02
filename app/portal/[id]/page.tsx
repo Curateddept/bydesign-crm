@@ -473,11 +473,19 @@ export default function ClientPortalPage() {
   const [tab,    setTab]    = useState<'social'|'email'|'tasks'|'ideas'>('social')
 
   useEffect(()=>{
+    // Verify session exists and belongs to this portal id
     const stored = sessionStorage.getItem('portalClient')
     if (!stored) { router.push('/portal'); return }
-    const data = JSON.parse(stored)
-    if (data.id !== id) { router.push('/portal'); return }
-    setClient(data)
+    const session = JSON.parse(stored)
+    if (session.id !== id) { router.push('/portal'); return }
+
+    // Always fetch fresh live data so new content/tasks appear immediately
+    fetch(`/api/portal/client/${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) { router.push('/portal'); return }
+        setClient(data)
+      })
   }, [id])
 
   if (!client) return (
