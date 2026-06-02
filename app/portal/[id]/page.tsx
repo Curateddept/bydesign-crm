@@ -49,10 +49,11 @@ const TASK_STATUS: Record<string, { label:string; color:string; bg:string }> = {
 
 function TabBar({ tab, setTab }: { tab:string; setTab:(t:any)=>void }) {
   const tabs = [
-    { id:'social',  label:'Social Schedule' },
-    { id:'email',   label:'Email Schedule'  },
-    { id:'tasks',   label:'To Do List'      },
-    { id:'ideas',   label:'Add Something'   },
+    { id:'social',    label:'Social Schedule' },
+    { id:'email',     label:'Email Schedule'  },
+    { id:'tasks',     label:'To Do List'      },
+    { id:'analytics', label:'Analytics'       },
+    { id:'ideas',     label:'Add Something'   },
   ]
   return (
     <div style={{ display:'flex', borderBottom:'1px solid #1e2a40', marginBottom:28 }}>
@@ -470,7 +471,7 @@ export default function ClientPortalPage() {
   const { id }  = useParams<{id:string}>()
   const router  = useRouter()
   const [client, setClient] = useState<any>(null)
-  const [tab,    setTab]    = useState<'social'|'email'|'tasks'|'ideas'>('social')
+  const [tab,    setTab]    = useState<'social'|'email'|'tasks'|'analytics'|'ideas'>('social')
 
   useEffect(()=>{
     // Verify session exists and belongs to this portal id
@@ -535,27 +536,35 @@ export default function ClientPortalPage() {
         </div>
 
         {/* Quick stats */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:28 }}>
-          {[
-            ['Scheduled Posts',   (client.contentItems||[]).length,                     '#e8eeff' ],
-            ['Active Tasks',      taskCount,                                             '#fdab3d' ],
-            ['Active Contract',   (client.contracts||[]).length > 0 ? 'Yes' : 'None',   '#00e87a' ],
-          ].map(([l,v,c])=>(
-            <div key={l as string} style={{ padding:'14px 18px', background:'#111827', border:'1px solid #1e2a40', borderRadius:4 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:'#2a3a55', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>{l}</div>
-              <div style={{ fontSize:20, fontWeight:800, color:c as string }}>{v as any}</div>
+        {(() => {
+          const latestAnalytics = (client.analytics||[])[0]
+          const stats = [
+            ['Scheduled Posts', (client.contentItems||[]).filter((i:any)=>i.platform?.toLowerCase()!=='email').length, '#e8eeff'],
+            ['Active Tasks',    taskCount,                                                                              '#fdab3d'],
+            ['Active Contract', (client.contracts||[]).length > 0 ? 'Yes' : 'None',                                   '#00e87a'],
+            ...(latestAnalytics?.followers != null ? [['Followers', latestAnalytics.followers.toLocaleString(), '#a855f7']] : []),
+          ]
+          return (
+            <div style={{ display:'grid', gridTemplateColumns:`repeat(${stats.length},1fr)`, gap:10, marginBottom:28 }}>
+              {stats.map(([l,v,c]:any)=>(
+                <div key={l} style={{ padding:'14px 18px', background:'#111827', border:'1px solid #1e2a40', borderRadius:4 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:'#2a3a55', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>{l}</div>
+                  <div style={{ fontSize:20, fontWeight:800, color:c }}>{v}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )
+        })()}
 
         {/* Tabs */}
         <TabBar tab={tab} setTab={setTab} />
 
         {/* Tab content */}
-        {tab==='social' && <SocialTab client={client} />}
-        {tab==='email'  && <EmailTab  client={client} />}
-        {tab==='tasks'  && <TasksTab  client={client} />}
-        {tab==='ideas'  && <IdeasTab  clientId={client.id} />}
+        {tab==='social'    && <SocialTab    client={client} />}
+        {tab==='email'     && <EmailTab     client={client} />}
+        {tab==='tasks'     && <TasksTab     client={client} />}
+        {tab==='analytics' && <AnalyticsTab client={client} />}
+        {tab==='ideas'     && <IdeasTab     clientId={client.id} />}
 
       </div>
     </div>
