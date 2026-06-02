@@ -113,6 +113,12 @@ model AnalyticsEntry {
   updatedAt       DateTime @updatedAt
 }
 
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model EmailContact {
   id        String   @id @default(cuid())
   clientId  String

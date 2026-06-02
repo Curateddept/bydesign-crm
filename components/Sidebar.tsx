@@ -15,7 +15,15 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const [inboxCount, setInboxCount] = useState(0)
+  const [inboxCount,   setInboxCount]   = useState(0)
+  const [gcalConnected, setGcalConnected] = useState<boolean|null>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/google-calendar/status')
+      .then(r => r.ok ? r.json() : { connected: false })
+      .then(d => setGcalConnected(d.connected))
+      .catch(() => setGcalConnected(false))
+  }, [])
 
   // Poll for unread client messages every 30s
   useEffect(() => {
@@ -113,6 +121,28 @@ export default function Sidebar() {
           <div style={{ fontSize: 11, color: '#888' }}>
             {inboxCount} unread message{inboxCount !== 1 ? 's' : ''} — check client Notes tabs
           </div>
+        </div>
+      )}
+
+      {/* Google Calendar connect */}
+      {gcalConnected !== null && (
+        <div style={{ margin: '0 12px 10px', padding: '10px 12px', background: gcalConnected ? 'rgba(0,232,122,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${gcalConnected ? 'rgba(0,232,122,0.15)' : '#1a2335'}`, borderRadius: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+            <span style={{ fontSize: 12 }}>📅</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: gcalConnected ? '#00e87a' : '#555', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Google Calendar
+            </span>
+            {gcalConnected && <span style={{ fontSize: 9, color: '#00e87a', marginLeft: 'auto' }}>● Connected</span>}
+          </div>
+          {gcalConnected ? (
+            <div style={{ fontSize: 10, color: '#3d4f6e', lineHeight: 1.5 }}>
+              To-Dos auto-sync to your calendar
+            </div>
+          ) : (
+            <a href="/api/auth/google-calendar" style={{ display: 'block', marginTop: 4, padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #1a2335', borderRadius: 4, fontSize: 10, fontWeight: 700, color: '#8a99b8', textDecoration: 'none', textAlign: 'center', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Connect →
+            </a>
+          )}
         </div>
       )}
 
