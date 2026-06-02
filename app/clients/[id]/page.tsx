@@ -8,7 +8,7 @@ import ContentTab from '@/components/tabs/ContentTab'
 import AnalyticsTab from '@/components/tabs/AnalyticsTab'
 import NotesTab from '@/components/tabs/NotesTab'
 
-const TABS = ['Overview','Contracts','To-Do','Content','Analytics','Notes']
+const TABS = ['Overview','Contracts','To-Do','Social Calendar','Analytics','Notes']
 
 export default function ClientDetailPage() {
   const { id } = useParams<{ id:string }>()
@@ -183,7 +183,7 @@ export default function ClientDetailPage() {
 
       {tab==='Contracts'   && <ContractsTab  client={client} onRefresh={load} />}
       {tab==='To-Do'       && <DeliverablesTab client={client} onRefresh={load} />}
-      {tab==='Content'     && <ContentTab    client={client} onRefresh={load} />}
+      {tab==='Social Calendar' && <ContentTab client={client} onRefresh={load} />}
       {tab==='Analytics'   && <AnalyticsTab  client={client} onRefresh={load} />}
       {tab==='Notes'       && <NotesTab      client={client} onRefresh={load} />}
     </div>
