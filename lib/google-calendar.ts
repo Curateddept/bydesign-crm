@@ -18,8 +18,9 @@ export function getOAuthClient() {
 export function getAuthUrl() {
   const client = getOAuthClient()
   return client.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
+    access_type:  'offline',
+    prompt:       'consent',
+    login_hint:   'albert@4thosewhocreate.com',  // force correct account
     scope: ['https://www.googleapis.com/auth/calendar.events'],
   })
 }
