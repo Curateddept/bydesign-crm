@@ -5,10 +5,11 @@ import Link from 'next/link'
 import ContractsTab from '@/components/tabs/ContractsTab'
 import DeliverablesTab from '@/components/tabs/DeliverablesTab'
 import ContentTab from '@/components/tabs/ContentTab'
+import EmailTab from '@/components/tabs/EmailTab'
 import AnalyticsTab from '@/components/tabs/AnalyticsTab'
 import NotesTab from '@/components/tabs/NotesTab'
 
-const TABS = ['Overview','Contracts','To-Do','Social Calendar','Analytics','Notes']
+const TABS = ['Overview','Contracts','To-Do','Social Calendar','Email','Analytics','Notes']
 
 export default function ClientDetailPage() {
   const { id } = useParams<{ id:string }>()
@@ -69,6 +70,12 @@ export default function ClientDetailPage() {
                 <button onClick={()=>setEditing(false)} className="btn btn-ghost btn-sm">Cancel</button></>
             : <button onClick={()=>setEditing(true)} className="btn btn-ghost btn-sm">Edit Client</button>
           }
+          <button
+            onClick={()=>setTab('Email')}
+            className="btn btn-ghost btn-sm"
+            style={{ color:'#00e87a', borderColor:'rgba(0,232,122,0.3)' }}>
+            ✉️ Email Calendar
+          </button>
           <button onClick={del} className="btn btn-danger btn-sm">Delete</button>
           {client.portalEnabled && client.portalPin && (
             <Link href={`/portal/${id}`} target="_blank" className="btn btn-ghost btn-sm" style={{ color:'#ffffff', borderColor:'rgba(255,255,255,0.3)' }}>View Portal ↗</Link>
@@ -183,8 +190,9 @@ export default function ClientDetailPage() {
 
       {tab==='Contracts'   && <ContractsTab  client={client} onRefresh={load} />}
       {tab==='To-Do'       && <DeliverablesTab client={client} onRefresh={load} />}
-      {tab==='Social Calendar' && <ContentTab client={client} onRefresh={load} />}
-      {tab==='Analytics'   && <AnalyticsTab  client={client} onRefresh={load} />}
+      {tab==='Social Calendar' && <ContentTab  client={client} onRefresh={load} />}
+      {tab==='Email'           && <EmailTab    client={client} onRefresh={load} />}
+      {tab==='Analytics'       && <AnalyticsTab client={client} onRefresh={load} />}
       {tab==='Notes'       && <NotesTab      client={client} onRefresh={load} />}
     </div>
   )

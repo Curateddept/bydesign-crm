@@ -10,7 +10,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       deliverables: { orderBy: { dueDate: 'asc' }, include: { subTasks: { orderBy: { createdAt: 'asc' } } } },
       analytics: { orderBy: { periodStart: 'desc' } },
       contentItems: { orderBy: { scheduledAt: 'asc' } },
-      clientNotes: { orderBy: { createdAt: 'desc' } },
+      clientNotes:   { orderBy: { createdAt: 'desc' } },
+      emailContacts: { orderBy: { createdAt: 'asc' } },
     },
   })
   if (!client) return NextResponse.json({ error: 'Not found' }, { status: 404 })

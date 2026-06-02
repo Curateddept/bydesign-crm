@@ -27,11 +27,12 @@ model Client {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  contracts    Contract[]
-  deliverables Deliverable[]
-  analytics    AnalyticsEntry[]
-  contentItems ContentItem[]
-  clientNotes  ClientNote[]
+  contracts     Contract[]
+  deliverables  Deliverable[]
+  analytics     AnalyticsEntry[]
+  contentItems  ContentItem[]
+  clientNotes   ClientNote[]
+  emailContacts EmailContact[]
 }
 
 model Contract {
@@ -110,6 +111,19 @@ model AnalyticsEntry {
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model EmailContact {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  email     String
+  firstName String?
+  lastName  String?
+  tags      String?
+  status    String   @default("subscribed")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContentItem {
